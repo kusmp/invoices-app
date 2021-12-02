@@ -26,10 +26,10 @@ public class InvoiceService {
 
     public InvoiceDTO getInvoice(String id) throws StripeException {
         Stripe.apiKey = stripeConfig.getStripeAppKey();
-        var invoiceItem = Invoice.retrieve(id);
-        var invoiceItemDTO = InvoiceItemDTO.builder().amount(invoiceItem.getAmountDue()).currency(invoiceItem.getCurrency()).customer(invoiceItem.getCustomer()).build();
+        var invoice = Invoice.retrieve(id);
+        var invoiceItemDTO = InvoiceItemDTO.builder().amount(invoice.getAmountDue()).currency(invoice.getCurrency()).customer(invoice.getCustomer()).build();
 
-        return InvoiceDTO.builder().id(invoiceItem.getId()).accountCountry(invoiceItem.getAccountCountry()).amountDue(invoiceItem.getAmountDue()).amountPaid(invoiceItem.getAmountPaid()).customer(invoiceItem.getCustomer()).invoiceItem(invoiceItemDTO).build();
+        return createInvoiceDTO(invoice, invoiceItemDTO);
     }
 
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) throws StripeException {
@@ -39,12 +39,27 @@ public class InvoiceService {
                 InvoiceCreateParams.builder()
                         .setCustomer(invoiceDTO.getCustomer())
                         .build();
+
         var stripeInvoice = Invoice.create(invoiceParams);
-        var invoiceItemDTO = InvoiceItemDTO.builder().amount(invoiceItem.getAmount()).currency(invoiceItem.getCurrency()).customer(invoiceItem.getCustomer()).build();
-        return InvoiceDTO.builder().id(stripeInvoice.getId()).accountCountry(stripeInvoice.getAccountCountry()).amountDue(stripeInvoice.getAmountDue()).amountPaid(stripeInvoice.getAmountPaid()).customer(stripeInvoice.getCustomer()).invoiceItem(invoiceItemDTO).build();
+
+        var invoiceItemDTO = InvoiceItemDTO.builder().
+                amount(invoiceItem.getAmount())
+                .currency(invoiceItem.getCurrency()).
+                customer(invoiceItem.getCustomer())
+                .build();
+
+        return createInvoiceDTO(stripeInvoice, invoiceItemDTO);
     }
 
-    public String createCustomer() throws StripeException {
-        return clientService.createNewCustomer().getId();
+    private InvoiceDTO createInvoiceDTO(Invoice invoice, InvoiceItemDTO invoiceItemDTO) {
+
+        return InvoiceDTO.builder()
+                .id(invoice.getId())
+                .accountCountry(invoice.getAccountCountry())
+                .amountDue(invoice.getAmountDue())
+                .amountPaid(invoice.getAmountPaid())
+                .customer(invoice.getCustomer())
+                .invoiceItem(invoiceItemDTO)
+                .build();
     }
 }
