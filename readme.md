@@ -16,7 +16,7 @@ The app uses the Stripe API to get and add invoices to the system.
 
 GET `http://localhost:8080/v1/{invoiceId}` - get althe invoice by id
 
-POST `localhost:8080/v1/user` - create new customer
+POST `localhost:8080/v1/customer` - create new customer
 
 POST `localhost:8080/v1/` - save new invoice
 
